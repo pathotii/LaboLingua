@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "123756734956",
+    "project_id": "labo-lingua",
+    "storage_bucket": "labo-lingua.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123756734956:android:bf1ebc76e257aef7e7f8c9",
+        "android_client_info": {
+          "package_name": "com.example.library_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXDwfiP21EiXT_58fq0zOMjyo4U3O6Ffo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

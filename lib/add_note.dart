@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:library_app/home.dart';
 import 'package:path/path.dart';
@@ -29,40 +30,60 @@ class _AddNoteViewState extends State<AddNoteView> {
   }
 
   Future<void> _selectAudioFile() async {
-  FilePickerResult? result = await FilePicker.platform.pickFiles(
-    type: FileType.custom, // Change to custom
-    allowedExtensions: ['mp3'], // Specify allowed extensions
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom, // Change to custom
+      allowedExtensions: ['mp3'], // Specify allowed extensions
+    );
+
+    if (result != null) {
+      setState(() {
+        _audioFilePath = result.files.single.path; // Store the file path
+      });
+    }
+  }
+
+  Future<void> _saveNote() async {
+  final studentName = await DatabaseHelper().fetchStudentName();
+
+  final note = {
+    'studentName': studentName,
+    'word': _wordController.text,
+    'definitionLabo': _definitionLaboController.text,
+    'definitionFilipino': _definitionFilipinoController.text,
+    'definitionEnglish': _definitionEnglishController.text,
+    'audioFilePath': _audioFilePath,
+    'status': 'pending',
+  };
+
+  await FirebaseFirestore.instance.collection('teacher_approval').add(note);
+  print('Note saved in Firestore for approval');
+
+  // Clear the text fields
+  _wordController.clear();
+  _definitionLaboController.clear();
+  _definitionFilipinoController.clear();
+  _definitionEnglishController.clear();
+  setState(() {
+    _audioFilePath = null; // Clear audio file path
+  });
+
+  // Show confirmation message
+  ScaffoldMessenger.of(context as BuildContext).showSnackBar(
+    const SnackBar(
+      content: Text('The word has been saved for approval.'),
+      duration: Duration(seconds: 2),
+    ),
   );
 
-  if (result != null) {
-    setState(() {
-      _audioFilePath = result.files.single.path; // Store the file path
-    });
+  // Print the contents of the table
+  _printTableContents();
+
+  // Check if mounted before navigating to avoid issues
+  if (mounted) {
+    Navigator.pop(context as BuildContext);
   }
 }
 
-
-  Future<void> _saveNote() async {
-    final note = {
-      'word': _wordController.text,
-      'definitionLabo': _definitionLaboController.text,
-      'definitionFilipino': _definitionFilipinoController.text,
-      'definitionEnglish': _definitionEnglishController.text,
-      'audioFilePath': _audioFilePath, // Can be null if no recording
-    };
-
-    // Insert the note into the database
-    final id = await DatabaseHelper().insertNote(note);
-    print('Note saved with id: $id');
-
-    // Print the contents of the table
-    _printTableContents();
-
-    // Check if mounted before navigating to avoid issues
-    if (mounted) {
-      Navigator.pop(context as BuildContext);
-    }
-  }
 
   Future<void> _printTableContents() async {
     final notes = await DatabaseHelper().fetchWords();
@@ -73,6 +94,7 @@ class _AddNoteViewState extends State<AddNoteView> {
       print('Definition (Filipino): ${note['definitionFilipino']}');
       print('Definition (English): ${note['definitionEnglish']}');
       print('Audio File Path: ${note['audioFilePath']}');
+      print('Student Name: ${note['studentName']}'); // Print student's name
       print('---');
     }
   }
@@ -167,6 +189,7 @@ class _AddNoteViewState extends State<AddNoteView> {
                               builder: (context) => const HomeView(),
                             ),
                           );
+                          Navigator.pop(context);
                         },
                       ),
                     ],
@@ -174,7 +197,7 @@ class _AddNoteViewState extends State<AddNoteView> {
                 ),
               ),
             ),
-            // Bottom Navigation Bar
+
             Container(
               decoration: const BoxDecoration(
                 border: Border(top: BorderSide(color: Colors.black12)),

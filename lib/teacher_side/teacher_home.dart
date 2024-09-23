@@ -2,19 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:library_app/login/login_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'SQFLite/database_helper.dart';
-import 'bookmarked_view.dart';
-import 'view_words.dart';
-import 'add_note.dart';
+import '../SQFLite/database_helper.dart';
+import '../view_words.dart';
+import 'pending_view.dart';
 
-class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+class TeacherHomeView extends StatefulWidget {
+  const TeacherHomeView({super.key});
 
   @override
-  State<HomeView> createState() => _HomeViewState();
+  State<TeacherHomeView> createState() => _TeacherHomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _TeacherHomeViewState extends State<TeacherHomeView> {
   final List<Map<String, String>> _preSavedItems = [
     {
       'word': 'Awas',
@@ -1531,8 +1530,8 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     super.initState();
     _loadBookmarkedWords();
-    _fetchApprovedWords();
     _printAllWords();
+    _fetchApprovedWords();
   }
 
   Future<void> _printAllWords() async {
@@ -1540,7 +1539,7 @@ class _HomeViewState extends State<HomeView> {
       final words = await DatabaseHelper().fetchAllWords();
       print('All words in the notes table:');
       for (var word in words) {
-        print(word['word']); // Adjust the key if necessary
+        print(word['word']);
       }
     } catch (e) {
       print('Failed to fetch words: $e');
@@ -1556,7 +1555,7 @@ class _HomeViewState extends State<HomeView> {
     setState(() {
       _approvedWords = querySnapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>; 
-        print('Fetched approved word: ${data['word']}'); 
+        print('Fetched approved word: ${data['word']}');
         return {
           'word': data['word'],
           'definitionLabo': data['definitionLabo'],
@@ -1575,7 +1574,6 @@ class _HomeViewState extends State<HomeView> {
     print('Error fetching approved words: $e');
   }
 }
-
 
   void _updateSearchQuery(String query) {
     setState(() {
@@ -1669,8 +1667,7 @@ class _HomeViewState extends State<HomeView> {
     final filteredItems = allItems.where((item) {
       final word = item['word']?.toLowerCase() ?? '';
       final query = _searchQuery.toLowerCase();
-      return word.startsWith(
-          query);
+      return word.startsWith(query);
     }).toList();
 
     String capitalize(String word) {
@@ -1679,9 +1676,7 @@ class _HomeViewState extends State<HomeView> {
     }
 
     final capitalizedItems = filteredItems.map((item) {
-      return {
-        ...item,
-        'word': capitalize(item['word'] ?? ''),
+      return {...item, 'word': capitalize(item['word'] ?? ''), 
       };
     }).toList();
 
@@ -1851,18 +1846,18 @@ class _HomeViewState extends State<HomeView> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const AddNoteView(),
+                          builder: (context) => const PendingWordsView(),
                         ),
                       );
                       break;
-                    case 2:
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const BookmarkedView(),
-                        ),
-                      );
-                      break;
+                    // case 2:
+                    //   Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //       builder: (context) => const BookmarkedView(),
+                    //     ),
+                    //   );
+                    //   break;
                     // case 3:
                     //   Navigator.push(
                     //     context,
@@ -1871,7 +1866,7 @@ class _HomeViewState extends State<HomeView> {
                     //     ),
                     //   );
                     //   break;
-                    case 4:
+                    case 3:
                       _handleLogout(context);
                       break;
                   }
@@ -1887,23 +1882,23 @@ class _HomeViewState extends State<HomeView> {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const AddNoteView(),
+                            builder: (context) => const PendingWordsView(),
                           ),
                         );
                         _loadWordsFromDatabase();
                       },
-                      child: const Icon(Icons.add_box_outlined),
+                      child: const Icon(Icons.pending_outlined),
                     ),
-                    label: 'Add Note',
+                    label: 'Pending Notes',
                   ),
                   const BottomNavigationBarItem(
-                    icon: Icon(Icons.bookmark_add_outlined),
-                    label: 'Saved',
+                    icon: Icon(Icons.approval_outlined),
+                    label: 'Approved Notes',
                   ),
-                  const BottomNavigationBarItem(
-                    icon: Icon(Icons.account_box_outlined),
-                    label: 'Account',
-                  ),
+                  // const BottomNavigationBarItem(
+                  //   icon: Icon(Icons.account_box_outlined),
+                  //   label: 'Account',
+                  // ),
                   const BottomNavigationBarItem(
                     icon: Icon(Icons.logout_outlined),
                     label: 'Logout',

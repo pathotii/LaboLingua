@@ -20,7 +20,6 @@ class ViewNoteView extends StatefulWidget {
     required this.definitionFilipino,
     required this.definitionEnglish,
     this.audioFilePath,
-    
   });
 
   @override
@@ -82,8 +81,7 @@ class _ViewNoteViewState extends State<ViewNoteView> {
             Padding(
               padding: const EdgeInsets.only(top: 15),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -103,103 +101,73 @@ class _ViewNoteViewState extends State<ViewNoteView> {
               ),
             ),
             // Content of the note
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    widget.word,
-                    style: const TextStyle(
-                        fontSize: 28, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text('Pandiwa', style: TextStyle(fontSize: 18)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.note_add),
-                        onPressed: () {
-                          Clipboard.setData(ClipboardData(text: widget.word));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Word copied to clipboard!')),
-                          );
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                          color: _isBookmarked ? Colors.yellow : null,
-                        ),
-                        onPressed: _toggleBookmark, // Toggle bookmark
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.volume_up),
-                        onPressed: () async {
-                          if (widget.audioFilePath != null) {
-                            // Play the audio file if it exists
-                            await _audioPlayer.play(DeviceFileSource(widget.audioFilePath!));
-                          } else {
-                            // Optionally, show a message if no audio is available
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      widget.word,
+                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text('Pandiwa', style: TextStyle(fontSize: 18)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.note_add),
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: widget.word));
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      'No audio available for this word.')),
+                              const SnackBar(content: Text('Word copied to clipboard!')),
                             );
-                          }
-                        },
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.volume_up),
+                          onPressed: () async {
+                            if (widget.audioFilePath != null) {
+                              // Play the audio file if it exists
+                              await _audioPlayer.play(DeviceFileSource(widget.audioFilePath!));
+                            } else {
+                              // Optionally, show a message if no audio is available
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('No audio available for this word.')),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      width: 450, // Set the desired width
+                      child: Divider(
+                        color: Colors.black,
+                        thickness: 2.0,
+                        height: 25,
                       ),
-                    ],
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 16),
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Depenisyon',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Salitang Labo:\n - ${widget.definitionLabo}\n',
-                        style: const TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Salitang Filipino:\n - ${widget.definitionFilipino}\n',
-                        style: const TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Depenisyon sa salitang English:\n - ${widget.definitionEnglish}\n',
-                        style: const TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Depenisyon\n',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _buildDefinitionRow('Salitang Labo:', widget.definitionLabo),
+                    const SizedBox(height: 8),
+                    _buildDefinitionRow('Salitang Filipino:', widget.definitionFilipino),
+                    const SizedBox(height: 8),
+                    _buildDefinitionRow('Depenisyon sa salitang English:', widget.definitionEnglish),
+                    const SizedBox(height: 16),
+                  ],
+                ),
               ),
             ),
           ],
@@ -264,6 +232,26 @@ class _ViewNoteViewState extends State<ViewNoteView> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Helper method to handle long text by splitting into multiple lines
+  Widget _buildDefinitionRow(String title, String definition) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              '$title\n - $definition\n',
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              overflow: TextOverflow.visible, // Allow overflow to wrap
+              softWrap: true, // Enable soft wrapping
+            ),
+          ),
+        ],
       ),
     );
   }

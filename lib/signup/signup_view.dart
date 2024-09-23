@@ -8,10 +8,8 @@ import '../../common_widget/round_textfield.dart';
 import '../../SQFLite/database_helper.dart';
 import 'package:email_validator/email_validator.dart';
 
-
 class SignUpView extends StatefulWidget {
-  final String userEmail;
-  const SignUpView({super.key, required this.userEmail});
+  const SignUpView({super.key});
 
   @override
   State<SignUpView> createState() => _SignUpViewState();
@@ -25,6 +23,9 @@ class _SignUpViewState extends State<SignUpView> {
   bool isCheck = false;
   bool _obscurePassword = true;
   final _formKey = GlobalKey<FormState>();
+
+  // Add a variable to hold the selected user type
+  String _userType = 'Student'; // Default selection
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,7 @@ class _SignUpViewState extends State<SignUpView> {
                   Padding(
                     padding: EdgeInsets.only(top: media.width * 0.07),
                     child: Text(
-                      "Kamusta,",
+                      "Kumusta,",
                       style: TextStyle(color: TColor.gray, fontSize: 16),
                     ),
                   ),
@@ -54,9 +55,26 @@ class _SignUpViewState extends State<SignUpView> {
                         fontSize: 20,
                         fontWeight: FontWeight.w700),
                   ),
-                  SizedBox(
-                    height: media.width * 0.05,
+                  SizedBox(height: media.width * 0.05),
+
+                  // Dropdown for user type selection
+                  DropdownButton<String>(
+                    value: _userType,
+                    items: <String>['Student', 'Teacher'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _userType = newValue!;
+                      });
+                    },
                   ),
+
+                  SizedBox(height: media.width * 0.04),
+
                   RoundTextField(
                     hitText: "First Name",
                     icon: "assets/images/user_text.png",
@@ -68,9 +86,7 @@ class _SignUpViewState extends State<SignUpView> {
                       return null;
                     },
                   ),
-                  SizedBox(
-                    height: media.width * 0.04,
-                  ),
+                  SizedBox(height: media.width * 0.04),
                   RoundTextField(
                     hitText: "Last Name",
                     icon: "assets/images/user_text.png",
@@ -82,9 +98,7 @@ class _SignUpViewState extends State<SignUpView> {
                       return null;
                     },
                   ),
-                  SizedBox(
-                    height: media.width * 0.04,
-                  ),
+                  SizedBox(height: media.width * 0.04),
                   RoundTextField(
                     hitText: "Email",
                     icon: "assets/images/email.png",
@@ -100,9 +114,7 @@ class _SignUpViewState extends State<SignUpView> {
                       return null;
                     },
                   ),
-                  SizedBox(
-                    height: media.width * 0.04,
-                  ),
+                  SizedBox(height: media.width * 0.04),
                   RoundTextField(
                     hitText: "Password",
                     icon: "assets/images/lock.png",
@@ -121,7 +133,9 @@ class _SignUpViewState extends State<SignUpView> {
                         });
                       },
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                         color: TColor.gray,
                         size: 20,
                       ),
@@ -152,9 +166,7 @@ class _SignUpViewState extends State<SignUpView> {
                       ),
                     ],
                   ),
-                  SizedBox(
-                    height: media.width * 0.2,
-                  ),
+                  SizedBox(height: media.width * 0.2),
                   RoundButton(
                     title: "Mag register",
                     type: RoundButtonType.bgGradient,
@@ -165,31 +177,32 @@ class _SignUpViewState extends State<SignUpView> {
                           lastName: _lastNameController.text,
                           email: _emailController.text,
                           password: _passwordController.text,
+                          userType: _userType, // Pass the user type
                         );
 
                         await DatabaseHelper().insertUser(newUser);
                         checkUsers();
 
-                        // Navigate to CompleteProfileView
+                        // Navigate to the TutorialView with userType
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const TutorialView(),
+                            builder: (context) =>
+                                TutorialView(userType: _userType),
                           ),
                         );
                       }
                     },
                   ),
-                  SizedBox(
-                    height: media.width * 0.04,
-                  ),
+                  SizedBox(height: media.width * 0.04),
                   TextButton(
                     onPressed: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const 
-                              LoginView()));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginView(),
+                        ),
+                      );
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -211,9 +224,7 @@ class _SignUpViewState extends State<SignUpView> {
                       ],
                     ),
                   ),
-                  SizedBox(
-                    height: media.width * 0.04,
-                  ),
+                  SizedBox(height: media.width * 0.04),
                 ],
               ),
             ),

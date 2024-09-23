@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:library_app/onboarding/onboarding_page.dart';
 import 'package:provider/provider.dart';
@@ -6,7 +7,10 @@ import 'common/colo_extension.dart';
 // ignore: unused_import
 import 'home.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  
   runApp(
     ChangeNotifierProvider(
       create: (context) => BookmarkProvider(),

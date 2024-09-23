@@ -2,33 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:library_app/home.dart';
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
+import 'teacher_side/teacher_home.dart';
 
 class TutorialView extends StatefulWidget {
+  final String userType; // Accept userType parameter
 
-  const TutorialView({super.key});
+  const TutorialView({super.key, required this.userType});
 
   @override
   State<TutorialView> createState() => _TutorialViewState();
 }
 
 class _TutorialViewState extends State<TutorialView> {
-  final PageController _pageController = PageController(viewportFraction: 0.7, initialPage: 0);
+  final PageController _pageController =
+      PageController(viewportFraction: 0.7, initialPage: 0);
 
   final List<Map<String, String>> tutorialSlides = [
     {
-      "image": "assets/images/tutor1.png", // Replace with your own tutorial images
+      "image":
+          "assets/images/tutor1.png", // Replace with your own tutorial images
       "title": "Welcome to the App",
-      "subtitle": "Discover how to make the most of the app\nwith this quick tutorial."
+      "subtitle":
+          "Discover how to make the most of the app\nwith this quick tutorial."
     },
     {
       "image": "assets/images/tutor2.png",
       "title": "Track Your Progress",
-      "subtitle": "Keep an eye on your achievements and\nmonitor your progress in real-time."
+      "subtitle":
+          "Keep an eye on your achievements and\nmonitor your progress in real-time."
     },
     {
       "image": "assets/images/tutor3.png",
       "title": "Stay Motivated",
-      "subtitle": "Set your goals, receive reminders, and\nstay on track with our motivational tips."
+      "subtitle":
+          "Set your goals, receive reminders, and\nstay on track with our motivational tips."
     },
   ];
 
@@ -48,7 +55,8 @@ class _TutorialViewState extends State<TutorialView> {
                   final slide = tutorialSlides[index];
                   return Center(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: media.width * 0.02),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: media.width * 0.02),
                       child: Container(
                         width: media.width * 0.9,
                         height: media.height * 0.6,
@@ -89,7 +97,8 @@ class _TutorialViewState extends State<TutorialView> {
                             ),
                             SizedBox(height: media.width * 0.02),
                             Padding(
-                              padding: EdgeInsets.only(bottom: media.width * 0.05),
+                              padding:
+                                  EdgeInsets.only(bottom: media.width * 0.05),
                               child: Text(
                                 slide["subtitle"]!,
                                 textAlign: TextAlign.center,
@@ -142,12 +151,22 @@ class _TutorialViewState extends State<TutorialView> {
                         title: "Proceed",
                         type: RoundButtonType.bgGradient,
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const HomeView(),
-                            ),
-                          );
+                          // Redirect based on userType after completing the tutorial
+                          if (widget.userType == 'Teacher') {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const TeacherHomeView(),
+                              ),
+                            );
+                          } else {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomeView(),
+                              ),
+                            );
+                          }
                         },
                       ),
                     ),

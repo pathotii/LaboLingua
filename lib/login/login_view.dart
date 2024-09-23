@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:library_app/home.dart';
+import 'package:library_app/signup/signup_view.dart';
+import 'package:library_app/teacher_side/teacher_home.dart';
 import 'package:library_app/user_details.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
@@ -18,7 +21,7 @@ class _LoginViewState extends State<LoginView> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool isPasswordVisible = false;
-  
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
@@ -37,7 +40,7 @@ class _LoginViewState extends State<LoginView> {
                   Padding(
                     padding: EdgeInsets.only(top: media.width * 0.07),
                     child: Text(
-                      "Kamusta,",
+                      "Kumusta,",
                       style: TextStyle(color: TColor.gray, fontSize: 16),
                     ),
                   ),
@@ -118,7 +121,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ],
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 80),
                   RoundButton(
                     title: "Mag login",
                     type: RoundButtonType.bgGradient,
@@ -127,13 +130,26 @@ class _LoginViewState extends State<LoginView> {
                         final email = _emailController.text;
                         final password = _passwordController.text;
 
-                        // Check credentials
-                        bool isValid = await _validateLogin(email, password);
-                        if (isValid) {
-                          Navigator.push(
+                        // Check credentials and get user type
+                        final userType = await _validateLogin(email, password);
+                        if (userType != null) {
+                          SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          await prefs.setBool('isLoggedIn', true);
+                          await prefs.setString(
+                              'userToken', 'some_unique_token');
+
+                          // Navigate to appropriate view based on user type
+                          Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const HomeView()),
+                              builder: (context) {
+                                return userType == 'Teacher'
+                                    ? const TeacherHomeView()
+                                    : const HomeView();
+                              },
+                            ),
+                            (Route<dynamic> route) => false,
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -149,7 +165,12 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignUpView(), // Replace with your actual sign-in view
+                        ),
+                      );
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -183,16 +204,17 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
-  Future<bool> _validateLogin(String email, String password) async {
+  Future<String?> _validateLogin(String email, String password) async {
     final dbHelper = DatabaseHelper();
     List<UserDetails> userList = await dbHelper.users();
 
+    // Check the credentials and retrieve userType
     for (var user in userList) {
       if (user.email == email && user.password == password) {
-        return true;
+        return user.userType; // Return userType if credentials match
       }
     }
-    return false;
+    return null; // Return null if credentials are invalid
   }
 
   @override

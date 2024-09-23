@@ -1,4 +1,6 @@
 import 'package:library_app/signup/signup_view.dart';
+// ignore: unused_import
+import '../SQFLite/database_helper.dart';
 import '../common_widget/onboarding_page.dart';
 import 'package:flutter/material.dart';
 
@@ -28,26 +30,26 @@ class _OnBoardingViewState extends State<OnBoardingView> {
 
   List pageArr = [
     {
-      "title": "Alamin iba't ibang salita\nmula sa ibang bayan",
+      "title": "Halina't tuklasin ang mga\nsalitang Labo",
       "subtitle":
           "Tuklasin at kilalanin ang mga salitang ginagamit sa iba't ibang lugar.",
       "image": "assets/images/Group 10.png"
     },
     {
-      "title": "Matutong gamitin sa\nwastong pangungusap",
+      "title": "Matutong alamin ang\ntamang pagbigkas",
       "subtitle":
           "Pag-aralan kung paano gamitin ang mga salita sa tamang konteksto.",
       "image": "assets/images/Group 9.png"
     },
     {
-      "title": "Aralin at alamin ang mga kahulugan ng mga salita",
+      "title": "Aralin at unawain ang mga\nkahulugan ng mga salita",
       "subtitle":
           "Palawakin ang kaalaman sa mga kahulugan ng salita at kanilang gamit.",
       "image": "assets/images/Group 11 .png"
     },
     {
-      "title": "Mag ambag pa ng ibang\nmga kaalaman",
-      "subtitle": "Maging bahagi ng pag-unlad ng kaalaman sa ating wika.",
+      "title": "Makapag-ambag ng iba pang\nmga salita",
+      "subtitle": "Maging bahagi ng pag-unlad ng kaalaman sa salitang Labo.",
       "image": "assets/images/Group 12 .png"
     },
   ];
@@ -141,17 +143,18 @@ class _OnBoardingViewState extends State<OnBoardingView> {
           // Proceed to Tutorial Button on the Last Page
           // ElevatedButton(
           //   onPressed: () async {
-          //     await DatabaseHelper().createUserDetailsTable();
+          //     //await DatabaseHelper().upgradeDatabase();
+          //     await DatabaseHelper().getUserDetailsColumns();
           //     // Optionally show a message or navigate to another view
           //     ScaffoldMessenger.of(context).showSnackBar(
-          //       const SnackBar(content: Text('User details table created!')),
+          //       const SnackBar(content: Text('updated!')),
           //     );
           //   },
           //   child: const Text('Create User Details Table'),
           // ),
           if (selectPage == 3)
             Padding(
-              padding: const EdgeInsets.only(top: 700),
+              padding: const EdgeInsets.only(top: 650),
               child: Center(
                 child: Material(
                   borderRadius: BorderRadius.circular(35),
@@ -164,15 +167,13 @@ class _OnBoardingViewState extends State<OnBoardingView> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const SignUpView(
-                            userEmail: '',
-                          ),
+                          builder: (context) => const SignUpView(),
                         ),
                       );
                     },
                     child: Ink(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(35),
+                        borderRadius: BorderRadius.circular(25),
                         gradient: LinearGradient(
                           colors: TColor.primaryG,
                         ),
