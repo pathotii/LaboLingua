@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'dart:async';
 
 import '../user_details.dart';
 
@@ -9,11 +10,11 @@ class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
 
+  DatabaseHelper._internal();
+
   factory DatabaseHelper() {
     return _instance;
   }
-
-  DatabaseHelper._internal();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -27,7 +28,7 @@ class DatabaseHelper {
     String path = join(documentsDirectory.path, 'user_library_database.db');
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -45,23 +46,22 @@ class DatabaseHelper {
   }
 
   Future<List<String>> getUserDetailsColumns() async {
-  final db = await database;
+    final db = await database;
 
-  // Use PRAGMA to get the column info of user_details
-  final List<Map<String, dynamic>> result = 
-      await db.rawQuery("PRAGMA table_info(user_details)");
+    // Use PRAGMA to get the column info of user_details
+    final List<Map<String, dynamic>> result =
+        await db.rawQuery("PRAGMA table_info(user_details)");
 
-  // Extract column names from the result
-  List<String> columns = [];
-  for (var row in result) {
-    columns.add(row['name'] as String);
+    // Extract column names from the result
+    List<String> columns = [];
+    for (var row in result) {
+      columns.add(row['name'] as String);
+    }
+
+    // Print the list of columns
+    print('Columns in user_details: $columns');
+    return columns;
   }
-
-  // Print the list of columns
-  print('Columns in user_details: $columns');
-  return columns;
-}
-
 
   // Create the database tables
   Future<void> _onCreate(Database db, int version) async {
@@ -120,53 +120,76 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      // Creating a new table for user_details to include userType
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS user_details_new(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          first_name TEXT,
-          last_name TEXT,
-          email TEXT UNIQUE,
-          password TEXT,
-          userType TEXT CHECK(userType IN ('Teacher', 'Student')) NOT NULL DEFAULT 'Student'
-        )
-      ''');
+  if (oldVersion < 2) {
+    // Creating a new table for user_details to include userType
+    await db.execute(''' 
+      CREATE TABLE IF NOT EXISTS user_details_new(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        first_name TEXT,
+        last_name TEXT,
+        email TEXT UNIQUE,
+        password TEXT,
+        userType TEXT CHECK(userType IN ('Teacher', 'Student')) NOT NULL DEFAULT 'Student'
+      )
+    ''');
 
-      // Copy data from the old user_details table to the new one, setting a default userType
-      await db.execute('''
-        INSERT INTO user_details_new (id, first_name, last_name, email, password)
-        SELECT id, first_name, last_name, email, password FROM user_details
-      ''');
+    // Copy data from the old user_details table to the new one, setting a default userType
+    await db.execute(''' 
+      INSERT INTO user_details_new (id, first_name, last_name, email, password)
+      SELECT id, first_name, last_name, email, password FROM user_details
+    ''');
 
-      // Drop the old table
-      await db.execute('DROP TABLE IF EXISTS user_details');
+    // Drop the old table
+    await db.execute('DROP TABLE IF EXISTS user_details');
 
-      // Rename the new table to the original name
-      await db.execute('ALTER TABLE user_details_new RENAME TO user_details');
+    // Rename the new table to the original name
+    await db.execute('ALTER TABLE user_details_new RENAME TO user_details');
+    print("Database upgraded: user_details table updated to include userType.");
+  }
 
-      print("Database upgraded: user_details table updated to include userType.");
-    }
+  if (oldVersion < 3) {
+    // Add the 'category' column to the 'notes' table
+    await db.execute('''
+      ALTER TABLE notes ADD COLUMN category TEXT DEFAULT 'Uncategorized';
+    ''');
+
+    // Optionally, update existing records to set a default category (if they don't have one)
+    await db.execute('''
+      UPDATE notes SET category = 'Uncategorized' WHERE category IS NULL;
+    ''');
+
+    print("Database upgraded: 'category' column added to notes table.");
+  }
+}
+
+
+  Future<List<UserDetails>> getUserDetails() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('user_details');
+
+    return List.generate(maps.length, (i) {
+      return UserDetails.fromMap(maps[i]);
+    });
   }
 
   Future<void> upgradeDatabase() async {
-  final db = await database;
+    final db = await database;
 
-  try {
-    // Check current version and manually upgrade if needed
-    int oldVersion = await db.getVersion();
-    int newVersion = 2; // Define the target version
+    try {
+      // Check current version and manually upgrade if needed
+      int oldVersion = await db.getVersion();
+      int newVersion = 2; // Define the target version
 
-    if (oldVersion < newVersion) {
-      await _onUpgrade(db, oldVersion, newVersion);
-      print("Database upgraded from version $oldVersion to $newVersion.");
-    } else {
-      print("Database is already up-to-date.");
+      if (oldVersion < newVersion) {
+        await _onUpgrade(db, oldVersion, newVersion);
+        print("Database upgraded from version $oldVersion to $newVersion.");
+      } else {
+        print("Database is already up-to-date.");
+      }
+    } catch (e) {
+      print("Error upgrading database: $e");
     }
-  } catch (e) {
-    print("Error upgrading database: $e");
   }
-}
 
   Future<void> deleteAllData() async {
     final db = await database;
@@ -179,22 +202,22 @@ class DatabaseHelper {
   }
 
   Future<List<String>> getExistingTables() async {
-  final db = await database;
+    final db = await database;
 
-  // Query sqlite_master to get all table names
-  final List<Map<String, dynamic>> result = 
-      await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'");
+    // Query sqlite_master to get all table names
+    final List<Map<String, dynamic>> result =
+        await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'");
 
-  // Extract table names from the result
-  List<String> tables = [];
-  for (var row in result) {
-    tables.add(row['name'] as String);
+    // Extract table names from the result
+    List<String> tables = [];
+    for (var row in result) {
+      tables.add(row['name'] as String);
+    }
+
+    // Print the list of tables
+    print('Existing tables: $tables');
+    return tables;
   }
-
-  // Print the list of tables
-  print('Existing tables: $tables');
-  return tables;
-}
 
   Future<void> createBookmarkedWordsTable() async {
     final db = await database;
@@ -253,6 +276,20 @@ class DatabaseHelper {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
+  Future<String?> getUserType() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'user_details',
+      limit: 1, // Assuming there's only one entry for the logged-in user
+    );
+
+    if (maps.isNotEmpty) {
+      return maps[0]['userType'] as String; // Adjust field name if necessary
+    }
+
+    return null; // Return null if no user type is found
+  }
+
   // Fetch all bookmarked words from the database
   Future<List<Map<String, dynamic>>> getBookmarkedWords() async {
     final db = await database;
@@ -277,5 +314,23 @@ class DatabaseHelper {
   Future<void> close() async {
     Database db = await database;
     db.close();
+  }
+
+  Future<void> addCategoryColumn(Database db) async {
+    // Check if the 'category' column exists in the 'Notes' table
+    var result = await db.rawQuery('PRAGMA table_info(Notes)');
+    bool columnExists = false;
+
+    for (var column in result) {
+      if (column['name'] == 'category') {
+        columnExists = true;
+        break;
+      }
+    }
+
+    // If 'category' column doesn't exist, add it
+    if (!columnExists) {
+      await db.execute('ALTER TABLE Notes ADD COLUMN category TEXT');
+    }
   }
 }

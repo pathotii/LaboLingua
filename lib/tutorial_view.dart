@@ -20,22 +20,22 @@ class _TutorialViewState extends State<TutorialView> {
   final List<Map<String, String>> tutorialSlides = [
     {
       "image":
-          "assets/images/tutor1.png", // Replace with your own tutorial images
-      "title": "Welcome to the App",
+          "assets/images/tutor1.png", 
+      "title": "Maligayang Pagdating!",
       "subtitle":
-          "Discover how to make the most of the app\nwith this quick tutorial."
+          "Dito makikita ang lahat ng mga nilalaman ng application"
     },
     {
       "image": "assets/images/tutor2.png",
-      "title": "Track Your Progress",
+      "title": "Ang pagdagdag ng salita",
       "subtitle":
-          "Keep an eye on your achievements and\nmonitor your progress in real-time."
+          "sa 'add note' ay makikita niyo ang pahina kung saan maaari kayong mag-ambag ng mga salita"
     },
     {
       "image": "assets/images/tutor3.png",
-      "title": "Stay Motivated",
+      "title": "Ang mga nilalaman",
       "subtitle":
-          "Set your goals, receive reminders, and\nstay on track with our motivational tips."
+          "Maaari kayong magpili ng mga paborito ninyong salita o mag-ambag"
     },
   ];
 
@@ -136,7 +136,7 @@ class _TutorialViewState extends State<TutorialView> {
                   Padding(
                     padding: EdgeInsets.only(bottom: media.width * 0.015),
                     child: Text(
-                      "Learn the basics of the app\nand how to use its features",
+                      "Aralin kung ano ang mga nilalaman ng application\nat paano ito gamitin",
                       textAlign: TextAlign.center,
                       style: TextStyle(color: TColor.gray, fontSize: 12),
                     ),
@@ -148,7 +148,7 @@ class _TutorialViewState extends State<TutorialView> {
                     child: SizedBox(
                       height: media.width * 0.12,
                       child: RoundButton(
-                        title: "Proceed",
+                        title: "Magpatuloy",
                         type: RoundButtonType.bgGradient,
                         onPressed: () {
                           // Redirect based on userType after completing the tutorial
@@ -156,14 +156,14 @@ class _TutorialViewState extends State<TutorialView> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const TeacherHomeView(),
+                                builder: (context) => const TeacherHomeView(category: '',),
                               ),
                             );
                           } else {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const HomeView(),
+                                builder: (context) => HomeView(),
                               ),
                             );
                           }

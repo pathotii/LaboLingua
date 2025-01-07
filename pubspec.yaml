@@ -19,9 +19,15 @@ dependencies:
   audioplayers: ^6.1.0
   email_validator: ^3.0.0
   shared_preferences: ^2.1.1
-  firebase_core: ^2.4.0
+  firebase_storage: ^11.0.0
+  firebase_core: ^2.18.0
   firebase_auth: ^4.14.0
-  cloud_firestore: ^4.15.0
+  cloud_firestore: ^4.6.0
+  just_audio: ^0.9.30
+  permission_handler: ^10.0.0
+  flutter_native_splash: ^2.2.10
+  flutter_svg: ^2.0.9
+  flip_card: ^0.5.0
 
 dev_dependencies:
   flutter_test:
@@ -33,6 +39,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/audio/
+    - assets/POST.gif
 
   fonts:
     - family: Poppins
@@ -48,3 +56,8 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/images/LOGO.png"
   remove_alpha_ios: true
+
+flutter_native_splash:
+  image: assets/POST.gif # Can replace with a static PNG for native splash
+  color: "#ffffff"       # Background color
+

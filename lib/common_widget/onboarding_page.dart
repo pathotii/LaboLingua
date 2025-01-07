@@ -24,23 +24,25 @@ class OnBoardingPage extends StatelessWidget {
           SizedBox(
             height: media.width * 0.1,
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: Text(
-              pObj["title"].toString(),
-              style: TextStyle(
-                  color: TColor.black,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Text(
+                pObj["title"].toString(),
+                style: TextStyle(
+                    color: TColor.black.withOpacity(0.8),
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700),
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-            child: Text( 
-              pObj["subtitle"].toString(),
-              style: TextStyle(color: TColor.gray, fontSize: 14),
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          //   child: Text( 
+          //     pObj["subtitle"].toString(),
+          //     style: TextStyle(color: TColor.gray, fontSize: 14),
+          //   ),
+          // ),
         ],
       ),
     );

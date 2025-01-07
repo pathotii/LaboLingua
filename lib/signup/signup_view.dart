@@ -8,6 +8,8 @@ import '../../common_widget/round_textfield.dart';
 import '../../SQFLite/database_helper.dart';
 import 'package:email_validator/email_validator.dart';
 
+import '../common_widget/round_dropdown.dart';
+
 class SignUpView extends StatefulWidget {
   const SignUpView({super.key});
 
@@ -31,205 +33,209 @@ class _SignUpViewState extends State<SignUpView> {
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: TColor.white,
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(top: media.width * 0.07),
-                    child: Text(
-                      "Kumusta,",
-                      style: TextStyle(color: TColor.gray, fontSize: 16),
-                    ),
-                  ),
-                  Text(
-                    "Gumawa ng account",
-                    style: TextStyle(
-                        color: TColor.black,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700),
-                  ),
-                  SizedBox(height: media.width * 0.05),
-
-                  // Dropdown for user type selection
-                  DropdownButton<String>(
-                    value: _userType,
-                    items: <String>['Student', 'Teacher'].map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _userType = newValue!;
-                      });
-                    },
-                  ),
-
-                  SizedBox(height: media.width * 0.04),
-
-                  RoundTextField(
-                    hitText: "First Name",
-                    icon: "assets/images/user_text.png",
-                    controller: _firstNameController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Punan ang patlang para sa first name';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: media.width * 0.04),
-                  RoundTextField(
-                    hitText: "Last Name",
-                    icon: "assets/images/user_text.png",
-                    controller: _lastNameController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Punan ang patlang para sa last name';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: media.width * 0.04),
-                  RoundTextField(
-                    hitText: "Email",
-                    icon: "assets/images/email.png",
-                    keyboardType: TextInputType.emailAddress,
-                    controller: _emailController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Punan ang patlang para sa email';
-                      }
-                      if (!EmailValidator.validate(value)) {
-                        return 'kailangang tama ang pormat ng email';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: media.width * 0.04),
-                  RoundTextField(
-                    hitText: "Password",
-                    icon: "assets/images/lock.png",
-                    obscureText: _obscurePassword,
-                    controller: _passwordController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Punan ang patlang para sa password';
-                      }
-                      return null;
-                    },
-                    rigtIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        color: TColor.gray,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                  Row(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/POST.png', // Path to your GIF asset
+              fit: BoxFit.cover, // Cover the entire screen
+            ),
+          ),
+          SingleChildScrollView(
+            child: SafeArea(
+              child: Container(
+                height: media.height,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      IconButton(
-                        onPressed: () {
+                      Padding(
+                        padding: EdgeInsets.only(top: media.width * 0.07),
+                        child: Text(
+                          "Kumusta,",
+                          style: TextStyle(color: TColor.black.withOpacity(0.8), fontSize: 16),
+                        ),
+                      ),
+                      Text(
+                        "Gumawa ng account",
+                        style: TextStyle(
+                            color: TColor.black,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700),
+                      ),
+                      SizedBox(height: media.width * 0.05),
+                      RoundDropdownButton(
+                        value: _userType,
+                        items: const ['Student'],
+                        onChanged: (newValue) {
                           setState(() {
-                            isCheck = !isCheck;
+                            _userType = newValue!;
                           });
                         },
-                        icon: Icon(
-                          isCheck
-                              ? Icons.check_box_outlined
-                              : Icons.check_box_outline_blank_outlined,
-                          color: TColor.gray,
-                          size: 20,
+                        hintText: 'Select User Type',
+                        icon: Icons.school_outlined,
+                      ),
+                      SizedBox(height: media.width * 0.04),
+                      RoundTextField(
+                        hitText: "First Name",
+                        icon: "assets/images/user_text.png",
+                        controller: _firstNameController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Punan ang patlang para sa first name';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: media.width * 0.04),
+                      RoundTextField(
+                        hitText: "Last Name",
+                        icon: "assets/images/user_text.png",
+                        controller: _lastNameController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Punan ang patlang para sa last name';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: media.width * 0.04),
+                      RoundTextField(
+                        hitText: "Email",
+                        icon: "assets/images/email.png",
+                        keyboardType: TextInputType.emailAddress,
+                        controller: _emailController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Punan ang patlang para sa email';
+                          }
+                          if (!EmailValidator.validate(value)) {
+                            return 'kailangang tama ang pormat ng email';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: media.width * 0.04),
+                      RoundTextField(
+                        hitText: "Password",
+                        icon: "assets/images/lock.png",
+                        obscureText: _obscurePassword,
+                        controller: _passwordController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Punan ang patlang para sa password';
+                          }
+                          return null;
+                        },
+                        rigtIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: TColor.gray,
+                            size: 20,
+                          ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5),
-                        child: Text(
-                          "By continuing you accept our Privacy Policy and\nTerm of Use",
-                          style: TextStyle(color: TColor.gray, fontSize: 10),
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                isCheck = !isCheck;
+                              });
+                            },
+                            icon: Icon(
+                              isCheck
+                                  ? Icons.check_box_outlined
+                                  : Icons.check_box_outline_blank_outlined,
+                              color: TColor.gray,
+                              size: 20,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Text(
+                              "By continuing you accept our Privacy Policy and\nTerm of Use",
+                              style:
+                                  TextStyle(color: TColor.gray, fontSize: 10),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: media.width * 0.2),
+                      RoundButton(
+                        title: "Mag register",
+                        type: RoundButtonType.bgGradient,
+                        onPressed: () async {
+                          if (_formKey.currentState?.validate() ?? false) {
+                            UserDetails newUser = UserDetails(
+                              firstName: _firstNameController.text,
+                              lastName: _lastNameController.text,
+                              email: _emailController.text,
+                              password: _passwordController.text,
+                              userType: _userType, // Pass the user type
+                            );
+                                
+                            await DatabaseHelper().insertUser(newUser);
+                            checkUsers();
+                                
+                            // Navigate to the TutorialView with userType
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    TutorialView(userType: _userType),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                      SizedBox(height: media.width * 0.04),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginView(),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "Meron ng account? ",
+                              style: TextStyle(
+                                color: TColor.black,
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              "Mag-login",
+                              style: TextStyle(
+                                  color: TColor.black,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700),
+                            )
+                          ],
                         ),
                       ),
+                      SizedBox(height: media.width * 0.04),
                     ],
                   ),
-                  SizedBox(height: media.width * 0.2),
-                  RoundButton(
-                    title: "Mag register",
-                    type: RoundButtonType.bgGradient,
-                    onPressed: () async {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        UserDetails newUser = UserDetails(
-                          firstName: _firstNameController.text,
-                          lastName: _lastNameController.text,
-                          email: _emailController.text,
-                          password: _passwordController.text,
-                          userType: _userType, // Pass the user type
-                        );
-
-                        await DatabaseHelper().insertUser(newUser);
-                        checkUsers();
-
-                        // Navigate to the TutorialView with userType
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                TutorialView(userType: _userType),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                  SizedBox(height: media.width * 0.04),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginView(),
-                        ),
-                      );
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Meron ng account? ",
-                          style: TextStyle(
-                            color: TColor.black,
-                            fontSize: 14,
-                          ),
-                        ),
-                        Text(
-                          "Mag-login",
-                          style: TextStyle(
-                              color: TColor.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700),
-                        )
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: media.width * 0.04),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

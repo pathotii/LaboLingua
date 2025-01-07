@@ -1,10 +1,12 @@
-import 'package:library_app/signup/signup_view.dart';
-// ignore: unused_import
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../SQFLite/database_helper.dart';
 import '../common_widget/onboarding_page.dart';
-import 'package:flutter/material.dart';
-
-import '../../common/colo_extension.dart';
+import 'package:library_app/signup/signup_view.dart'; // Import your SignUpView
+import '../../common/colo_extension.dart'; // Adjust the import as needed
+import '../home.dart';
+import '../teacher_side/teacher_home.dart';
+import '../user_details.dart';
 
 class OnBoardingView extends StatefulWidget {
   const OnBoardingView({super.key});
@@ -16,19 +18,22 @@ class OnBoardingView extends StatefulWidget {
 class _OnBoardingViewState extends State<OnBoardingView> {
   int selectPage = 0;
   PageController controller = PageController();
+  bool isLoggedIn = false;
+  String? userType;
+  
 
   @override
   void initState() {
     super.initState();
-
     controller.addListener(() {
-      selectPage = controller.page?.round() ?? 0;
-
-      setState(() {});
+      setState(() {
+        selectPage = controller.page?.round() ?? 0;
+      });
     });
   }
 
-  List pageArr = [
+  // Onboarding pages data
+  List<Map<String, String>> pageArr = [
     {
       "title": "Halina't tuklasin ang mga\nsalitang Labo",
       "subtitle":
@@ -48,7 +53,7 @@ class _OnBoardingViewState extends State<OnBoardingView> {
       "image": "assets/images/Group 11 .png"
     },
     {
-      "title": "Makapag-ambag ng iba pang\nmga salita",
+      "title": "Matukoy ang kategorya ng antas\nng wika sa rehistro ng Labo",
       "subtitle": "Maging bahagi ng pag-unlad ng kaalaman sa salitang Labo.",
       "image": "assets/images/Group 12 .png"
     },
@@ -59,13 +64,19 @@ class _OnBoardingViewState extends State<OnBoardingView> {
     return Scaffold(
       backgroundColor: TColor.white,
       body: Stack(
-        alignment: Alignment.bottomRight,
+        alignment: Alignment.center,
         children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/POST.png', // Path to your GIF asset
+              fit: BoxFit.cover, // Cover the entire screen
+            ),
+          ),
           PageView.builder(
             controller: controller,
             itemCount: pageArr.length,
             itemBuilder: (context, index) {
-              var pObj = pageArr[index] as Map? ?? {};
+              var pObj = pageArr[index];
               return OnBoardingPage(pObj: pObj);
             },
           ),
@@ -126,11 +137,10 @@ class _OnBoardingViewState extends State<OnBoardingView> {
                         ),
                         onPressed: () {
                           if (selectPage < 3) {
-                            selectPage = selectPage + 1;
+                            selectPage++;
                             controller.animateToPage(selectPage,
                                 duration: const Duration(milliseconds: 600),
-                                curve: Curves.bounceInOut);
-                            setState(() {});
+                                curve: Curves.easeIn);
                           }
                         },
                       ),
@@ -140,18 +150,7 @@ class _OnBoardingViewState extends State<OnBoardingView> {
               ),
             ),
 
-          // Proceed to Tutorial Button on the Last Page
-          // ElevatedButton(
-          //   onPressed: () async {
-          //     //await DatabaseHelper().upgradeDatabase();
-          //     await DatabaseHelper().getUserDetailsColumns();
-          //     // Optionally show a message or navigate to another view
-          //     ScaffoldMessenger.of(context).showSnackBar(
-          //       const SnackBar(content: Text('updated!')),
-          //     );
-          //   },
-          //   child: const Text('Create User Details Table'),
-          // ),
+          // Proceed to Next Screen Button on the Last Page
           if (selectPage == 3)
             Padding(
               padding: const EdgeInsets.only(top: 650),
@@ -161,15 +160,8 @@ class _OnBoardingViewState extends State<OnBoardingView> {
                   elevation: 5,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(35),
-                    onTap: () {
-                      // Open Welcome Screen
-                      print("Proceed to Tutorial");
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignUpView(),
-                        ),
-                      );
+                    onTap: () async {
+                      checkUserTypeAndNavigate();
                     },
                     child: Ink(
                       decoration: BoxDecoration(
@@ -198,44 +190,90 @@ class _OnBoardingViewState extends State<OnBoardingView> {
       ),
     );
   }
+
+  // Check if user is logged in and fetch userType
+  Future<String?> checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+    if (isLoggedIn) {
+      // Fetch userType from your local database
+      String? userType = await getUserTypeFromDatabase();
+      print("User is logged in, userType: $userType"); // Debugging statement
+      return userType;
+    }
+
+    print("User is not logged in"); // Debugging statement
+    return null; // Return null if the user is not logged in
+  }
+
+  Future<String?> getUserTypeFromDatabase() async {
+    DatabaseHelper dbHelper = DatabaseHelper();
+    List<UserDetails> userDetails = await dbHelper.getUserDetails();
+
+    if (userDetails.isNotEmpty) {
+      String userType = userDetails.first.userType;
+      print("Fetched userType from database: $userType"); // Debugging statement
+      return userType;
+    }
+
+    print("No user details found in database"); // Debugging statement
+    return null; // Return null if no user details are found
+  }
+
+  Future<void> checkUserTypeAndNavigate() async {
+  final userType = await DatabaseHelper().getUserType(); // Call the modified method
+
+  if (userType == 'Teacher') {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const TeacherHomeView(category: '',)),
+    );
+  } else if (userType == 'Student') {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => HomeView()),
+    );
+  } else {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const SignUpView()),
+    );
+  }
+}
+
 }
 
 class GradientCircularProgressPainter extends CustomPainter {
-  final double value;
-  final List<Color> gradientColors;
+  final double progress;
+  final List<Color> colors;
 
-  GradientCircularProgressPainter(this.value, this.gradientColors);
+  GradientCircularProgressPainter(this.progress, this.colors);
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Draw the background circle
-    Paint backgroundPaint = Paint()
-      ..color = Colors.transparent // Optional
+    Paint paintBackground = Paint()
+      ..color = Colors.grey.withOpacity(0.2)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 4;
-
+      ..strokeWidth = 6;
     canvas.drawCircle(
-        size.center(Offset.zero), size.width / 2, backgroundPaint);
+        size.center(Offset.zero), size.width / 2, paintBackground);
 
-    // Draw the gradient arc
-    Paint gradientPaint = Paint()
-      ..shader = LinearGradient(colors: gradientColors).createShader(
+    // Paint progress arc
+    Paint paintProgress = Paint()
+      ..shader = LinearGradient(colors: colors).createShader(Rect.fromCircle(
+          center: size.center(Offset.zero), radius: size.width / 2))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6;
+
+    double arcAngle = 2 * 3.141592653589793 * progress; // 2 * pi * progress
+    canvas.drawArc(
         Rect.fromCircle(
             center: size.center(Offset.zero), radius: size.width / 2),
-      )
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4;
-
-    double startAngle = -90 * (3.14159 / 180); // Start from the top
-    double sweepAngle = value * 2 * 3.14159; // Convert percentage to radians
-
-    canvas.drawArc(
-      Offset.zero & size,
-      startAngle,
-      sweepAngle,
-      false,
-      gradientPaint,
-    );
+        -3.141592653589793 / 2,
+        arcAngle,
+        false,
+        paintProgress);
   }
 
   @override

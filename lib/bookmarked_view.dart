@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:library_app/proponents.dart';
 import 'package:provider/provider.dart';
 import 'add_note.dart';
 import 'bookmark_provider.dart';
@@ -7,7 +8,9 @@ import 'home.dart';
 import 'view_words.dart';
 
 class BookmarkedView extends StatefulWidget {
-  const BookmarkedView({super.key});
+  final String category;
+
+  const BookmarkedView({super.key, required this.category});
 
   @override
   State<BookmarkedView> createState() => _BookmarkedViewState();
@@ -36,7 +39,15 @@ class _BookmarkedViewState extends State<BookmarkedView> {
 
   Future<void> _bookmarkWord(Map<String, dynamic> word) async {
     final provider = context.read<BookmarkProvider>();
-    int wordId = word['id'];
+    int? wordId = word['id'];
+
+    if (wordId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Word ID is missing. Cannot bookmark.')),
+      );
+      return;
+    }
+
     bool isBookmarked = provider.isBookmarked(wordId);
 
     if (!isBookmarked) {
@@ -99,192 +110,205 @@ class _BookmarkedViewState extends State<BookmarkedView> {
     }).toList();
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFFBAC08), Color(0xFFFFFAA7), Color(0xFFFFFAA7),  Color(0xFFFBAC08)],
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/POST.png', // Path to your GIF asset
+              fit: BoxFit.cover, // Cover the entire screen
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            // Positioned images at the top, similar to AppBar
-            Padding(
-              padding: const EdgeInsets.only(top: 15),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/images/LOGO.png',
-                      height: 75,
-                      fit: BoxFit.contain,
-                    ),
-                    const SizedBox(width: 80),
-                    Image.asset(
-                      'assets/images/TITLE.png',
-                      height: 65,
-                      fit: BoxFit.contain,
-                    ),
-                  ],
+          Column(
+            children: [
+              // Positioned images at the top, similar to AppBar
+              Padding(
+                padding: const EdgeInsets.only(top: 15),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10.0, vertical: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/LOGO.png',
+                        height: 75,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(width: 50),
+                      Image.asset(
+                        'assets/images/TITLE.png',
+                        height: 50,
+                        fit: BoxFit.contain,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      spreadRadius: 1,
-                      blurRadius: 5,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: _updateSearchQuery,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search),
-                    hintText: "Search...",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: const BorderSide(color: Colors.black),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 1,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: _updateSearchQuery,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.search),
+                      hintText: "Search...",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: const BorderSide(color: Colors.black),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            Expanded(
-              child: capitalizedItems.isEmpty
-                  ? const Center(child: Text('No bookmarked words'))
-                  : ListView.builder(
-                      itemCount: capitalizedItems.length,
-                      itemBuilder: (context, index) {
-                        final item = capitalizedItems[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 2.0, horizontal: 8.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(25),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
-                                  spreadRadius: 1,
-                                  blurRadius: 5,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 20.0),
-                                  leading: const Icon(Icons.wb_sunny_outlined),
-                                  title: Text(
-                                    item['word'] ?? 'No word',
-                                    style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500),
+              Expanded(
+                child: capitalizedItems.isEmpty
+                    ? const Center(child: Text('No bookmarked words'))
+                    : ListView.builder(
+                        itemCount: capitalizedItems.length,
+                        itemBuilder: (context, index) {
+                          final item = capitalizedItems[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 2.0, horizontal: 8.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(25),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    spreadRadius: 1,
+                                    blurRadius: 5,
+                                    offset: const Offset(0, 3),
                                   ),
-                                  trailing: IconButton(
-                                    icon: Icon(
-                                      provider.isBookmarked(item['id'])
-                                          ? Icons.bookmark
-                                          : Icons.bookmark_border,
-                                      color: Colors.black,
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 20.0),
+                                    leading:
+                                        const Icon(Icons.wb_sunny_outlined),
+                                    title: Text(
+                                      item['word'] ?? 'No word',
+                                      style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500),
                                     ),
-                                    onPressed: () => _bookmarkWord(item),
-                                  ),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ViewNoteView(
-                                          word: item['word'] ?? '',
-                                          definitionLabo:
-                                              item['definitionLabo'] ?? '',
-                                          definitionFilipino:
-                                              item['definitionFilipino'] ?? '',
-                                          definitionEnglish:
-                                              item['definitionEnglish'] ?? '',
-                                              
-                                        ),
+                                    trailing: IconButton(
+                                      icon: Icon(
+                                        provider.isBookmarked(item['id'])
+                                            ? Icons.bookmark
+                                            : Icons.bookmark_border,
+                                        color: Colors.black,
                                       ),
-                                    );
-                                  },
-                                ),
-                              ],
+                                      onPressed: () => _bookmarkWord(item),
+                                    ),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ViewNoteView(
+                                            word: item['word'] ?? '',
+                                            definitionLabo:
+                                                item['definitionLabo'] ?? '',
+                                            definitionFilipino:
+                                                item['definitionFilipino'] ??
+                                                    '',
+                                            definitionEnglish:
+                                                item['definitionEnglish'] ?? '',
+                                            category: widget.category,
+                                            audioFilePath: '',
+                                            meaning: '',
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
+              ),
+              Container(
+                decoration: const BoxDecoration(
+                  border: Border(
+                    top: BorderSide(color: Colors.black12),
+                  ),
+                ),
+                child: BottomNavigationBar(
+                  type: BottomNavigationBarType.fixed,
+                  backgroundColor: Colors.white,
+                  selectedItemColor: Colors.black,
+                  unselectedItemColor: Colors.black54,
+                  showSelectedLabels: true,
+                  showUnselectedLabels: true,
+                  onTap: (index) {
+                    if (index == 1) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomeView(),
+                        ),
+                      );
+                    }
+                    if (index == 2) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AddNoteView(),
+                        ),
+                      );
+                    }
+                    if (index == 3) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const Proponents(),
+                        ),
+                      );
+                    }
+                    // Handle other items if needed
+                  },
+                  items: const [
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.bookmark_add_outlined),
+                      label: 'Saved',
                     ),
-            ),
-            Container(
-              decoration: const BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: Colors.black12),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.home_max_outlined),
+                      label: 'Home',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.add_box_outlined),
+                      label: 'Add Note',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.account_box_outlined),
+                      label: 'Mananaliksik',
+                    ),
+                  ],
                 ),
               ),
-              child: BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-                backgroundColor: Colors.white,
-                selectedItemColor: Colors.black,
-                unselectedItemColor: Colors.black54,
-                showSelectedLabels: true,
-                showUnselectedLabels: true,
-                onTap: (index) {
-                  if (index == 1) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HomeView(),
-                      ),
-                    );
-                  }
-                  if (index == 2) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AddNoteView(),
-                      ),
-                    );
-                  }
-                  // Handle other items if needed
-                },
-                items: const [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.bookmark_add_outlined),
-                    label: 'Saved',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.home_max_outlined),
-                    label: 'Home',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.add_box_outlined),
-                    label: 'Add Note',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.account_box_outlined),
-                    label: 'Account',
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
